@@ -5,11 +5,28 @@ import dotenv from 'dotenv';
 dotenv.config({ path: './src/.env' }); // Ensure correct path if necessary
 
 import connectDB from './db/index.js';
+import { app } from './app.js'
 
-// console.log('MONGODB_URL:', process.env.MONGODB_URL); // Check if environment variable is loaded
 
+connectDB()                 //a promise is returned as we used async await over there
+    .then(() => {
+        // console.log("connection successfull");
 
-connectDB();
+        try {
+            app.listen(process.env.PORT || 8000, () => {
+                console.log(`server running on ${process.env.PORT}`);
+
+            });
+        }
+        catch (err) {
+            console.log("Error while listening ", err);
+        }
+
+    })
+    .catch((err) => {
+        console.log("Mongodb connection failed");
+
+    })
 
 
 
