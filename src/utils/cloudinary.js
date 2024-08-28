@@ -26,7 +26,7 @@ const uploadOnCloudinary = async (localfilePath) => {
     }
     catch (error) {
         //reasons for err may be many , but we know file is in localstorage, unlink it
-        fs.unlinkSync(localfilePath);   //remove locally saved temp file , here 'Sync' means this stmt must execute.
+        fs.unlinkSync(localfilePath);   //remove locally saved temp file , here 'Sync' (blocking code) means this stmt must execute.
 
         return error;
 

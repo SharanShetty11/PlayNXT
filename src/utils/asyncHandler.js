@@ -1,14 +1,19 @@
 //2 methods using promise and try-catch , we use promise
+//higher order function -> accept function -> return function
 
 
 const asyncHandler = (requestHandler) => {
-    (req, res, next) => {
+    return (req, res, next) => {
         Promise.resolve(requestHandler(req, res, next))
             .catch((err) => next(err))
     }
 }
 
 export { asyncHandler }
+
+
+
+
 
 
 
