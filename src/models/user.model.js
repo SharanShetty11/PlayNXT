@@ -59,7 +59,7 @@ userSchema.pre('save', async function (next) {
         return next();
     }
     //if modified
-    this.password = bcrypt.hash(this.password, 10);      //encrypt -> 10 rounds , salts , rounds , default 
+    this.password = await bcrypt.hash(this.password, 10);      //encrypt -> 10 rounds , salts , rounds , default 
     next()
 })
 
