@@ -10,7 +10,7 @@ const storage = multer.diskStorage({
 });
 
 export const upload = multer({
-    storage
+    storage,
 });
 
 //when we write routes , controllers ; we call our storage method 

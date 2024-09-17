@@ -10,15 +10,17 @@ const registerUser = asyncHandler(async (req, res) => {
     //     message : "Chai aur Code"
     // })
 
-    const { fullname, email, username, password } = req.body
-    console.log("email ", email);
+    // console.log(req.files); // Log the uploaded files
+
+    const { fullName, email, username, password } = req.body
+    // console.log("email ", email);
 
     // if(fullname == ""){     //beginners
     //     throw new ApiError(400,"fullname is required")
     // }
 
     if (
-        [fullname, email, username, password].some((field) => field?.trim() === "")
+        [fullName, email, username, password].some((field) => field?.trim() === "")
     ) {
         throw new ApiError(400, "All fields are required")
     }
@@ -31,12 +33,12 @@ const registerUser = asyncHandler(async (req, res) => {
     }
 
     if (!validateEmail(email)) {
-        throw new ApiError(400, "Email is Valid");
+        throw new ApiError(405, "Email is Not Valid");
     }
 
     //check for existing user
 
-    const existedUser = User.findOne({
+    const existedUser = await User.findOne({
         $or: [{ username }, { email }]
     })
 
@@ -44,21 +46,29 @@ const registerUser = asyncHandler(async (req, res) => {
         throw new ApiError(409, "User with email or username already exists")
     }
 
+    // console.log("req.body \n", req.body);
+
 
     //handling images using multer allows us to include more parameters
 
     const avatarLocalPath = req.files?.avatar[0]?.path;
-    const converImageLocalPath = req.files?.coverImage[0]?.path;
+    // const coverImageLocalPath = req.files?.coverImage[0]?.path;
+
+    let coverImageLocalPath;
+    if (req.files && Array.isArray(req.files.coverImage) && req.files.coverImage.length > 0) {
+        coverImageLocalPath = req.files.coverImage[0].path
+    }
 
     if (!avatarLocalPath) {
         throw new ApiError(400, "Avatar file is required")
     }
 
     const avatar = await uploadOnCloudinary(avatarLocalPath);
-    const coverImage = await uploadOnCloudinary(converImageLocalPath);
+    // console.log("Avatar upload response:", avatar); // Log Cloudinary response for avatar
+
+    const coverImage = await uploadOnCloudinary(coverImageLocalPath);
 
     //check avatar again
-
     if (!avatar) {
         throw new ApiError(400, "Avatar file is required")
     }
@@ -66,9 +76,9 @@ const registerUser = asyncHandler(async (req, res) => {
     //Entry into db via User
 
     const user = await User.create({
-        fullname,
+        fullName,
         avatar: avatar.url,
-        converImage: coverImage?.url || "",    //if cI doesn't exist ""
+        coverImage: coverImage?.url || "",    //if cI doesn't exist ""
         email,
         password,
         username: username.toLowerCase()
@@ -79,19 +89,19 @@ const registerUser = asyncHandler(async (req, res) => {
     )
     //weird syntax -> by default all fields are selected , - indicates not to included fields
 
-    if(!createdUser){
-        throw new ApiError(500 , "Something went wrong while registering the user")
+    if (!createdUser) {
+        throw new ApiError(500, "Something went wrong while registering the user")
     }
 
     //once the user has been created , produce response
-
+    console.log(`201, user with username ${username} has been created Successfully`)
     return res.status(201).json(
         new ApiResponse(200, createdUser, "User Registered Successfully")
     )
 
     //we specify status separately -> standard also expected by postman
 
-    
+
 
 })
 

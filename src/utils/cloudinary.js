@@ -1,6 +1,5 @@
 import { v2 as cloudinary } from 'cloudinary';
-import fs from "fs"
-
+import fs from "fs";
 
 // Configuration
 cloudinary.config({
@@ -9,29 +8,39 @@ cloudinary.config({
     api_secret: process.env.CLOUDINARY_API_SECRET
 });
 
+
 // Upload files
 const uploadOnCloudinary = async (localfilePath) => {
     try {
-        if (!localfilePath) return null; //if file path doesn't exist
+        if (!localfilePath) return null; // If file path doesn't exist
 
-        //upload the file on cloudinary
+        console.log("Attempting to upload file from:", localfilePath); // Log the path from which the file is being uploaded
 
-        const response = await cloudinary.uploader.upload(localfilePath, {
-            resource_type: 'auto'
-        })
+        // Upload the file on Cloudinary
+        const response = await cloudinary.uploader.upload(localfilePath,
+            {
+                resource_type: 'auto'
+            });
 
-        //file has been uploaded successfullly
-        console.log("file is uploaded on cloudinary ", response.url);
+        console.log("File has been uploaded successfully on Cloudinary:", response.url); // Log success message
+
+        fs.unlinkSync(localfilePath, (err) => {
+            if (err) console.error("Failed to delete local file:", err);
+            else console.log("Local file deleted successfully.");
+        }); // Asynchronously remove locally saved temp file and log result
+
         return response;
+
+    } catch (error) {
+        console.error("Failed to upload image to Cloudinary:", error); // Log detailed error message
+
+        fs.unlinkSync(localfilePath, (err) => {
+            if (err) console.error("Failed to delete local file:", err);
+            else console.log("Local file deleted successfully.");
+        });
+
+        return null;
     }
-    catch (error) {
-        //reasons for err may be many , but we know file is in localstorage, unlink it
-        fs.unlinkSync(localfilePath);   //remove locally saved temp file , here 'Sync' (blocking code) means this stmt must execute.
+};
 
-        return error;
-
-    }
-}
-
-
-export {uploadOnCloudinary}
+export { uploadOnCloudinary };

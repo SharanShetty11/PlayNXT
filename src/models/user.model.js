@@ -66,7 +66,7 @@ userSchema.pre('save', async function (next) {
 
 //inject own method into mongoose  -> default (updateOne() ,deleteOne())
 
-userSchema.methods.isPasswordCorrect = async function () {
+userSchema.methods.isPasswordCorrect = async function (password) {
     return await bcrypt.compare(password, this.password)   //this.password -> hashed password in db
 }
 
