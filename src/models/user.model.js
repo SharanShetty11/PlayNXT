@@ -49,18 +49,21 @@ const userSchema = new Schema({
     {
         timestamps: true
     })
-
+    
 
 //hooks -> pre
 
 userSchema.pre('save', async function (next) {
-    //we don't want each time hashing to happen , so write a condn
+    //we don't want each time hashing to happen , so write a condition
+
     if (!this.isModified("password")) {
         return next();
     }
-    //if modified
+    //if modified -> Hash the password
+    console.log('Hashing the new password');  // for debugging
+
     this.password = await bcrypt.hash(this.password, 10);      //encrypt -> 10 rounds , salts , rounds , default 
-    next()
+    next();
 })
 
 
@@ -93,7 +96,7 @@ userSchema.methods.generateRefreshToken = function () {
     return jwt.sign(
         {
             _id: this._id
-  
+
         },
         process.env.REFRESH_TOKEN_SECRET,
         {
